@@ -1,0 +1,35 @@
+for (3 kertaa)
+    kysy tunnusluku
+    if tunnusluku==oikea_tunnusluku
+        break
+    
+    else if (kolmas kerta)
+        print väärä tunnusluku
+        sulje ohjelma
+
+
+while (1)
+    kysy toiminto
+
+    if nosto
+        kysy noston määrä
+        vähennä saldosta
+        lisää tapahtuma
+        anna rahat
+
+    else if saldo
+        näytä saldo
+
+    else if tapahtumat
+        näytä tapahtumat
+
+    else if puheajan lataus
+        kysy liittymä
+        kysy puhelinnumero
+        kysy latauksen määrä
+        vähennä saldosta
+        lisää tapahtuma
+        lisää puheaikaa
+
+    else if exit
+        sulje ohjelma
