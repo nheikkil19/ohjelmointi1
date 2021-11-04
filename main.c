@@ -8,19 +8,23 @@ int lueKokonaisluku(void);
 void lueRoskat(void);
 
 // Omat funktiot
-int kysyPin(int oikeaPin);
+int kysyPin(void);
 void kysyToiminto(int *toim);
 void nostaRahaa(void);
 void naytaSaldo(void);
 void naytaTapahtumat(void);
 void lataaPuheaikaa(void);
+int tarkastaNosto(int nosto);
+void odotaJatkoa(void);
+
+int const OIKEAPIN = 1234;
+int saldo = 5000;
 
 
 int main(void) {
-    int const OIKEAPIN = 1234;
     int toiminto, suorita;
 
-    suorita = kysyPin(OIKEAPIN);
+    suorita = kysyPin();
 
     while (suorita) {
         kysyToiminto(&toiminto);
@@ -70,24 +74,23 @@ int lueKokonaisluku(void){
 // Tyhjentää stdin-puskurin. Kopioitu kurssilla jaetusta apuohjelmia.c -tiedostosta.
 void lueRoskat(void){
 
-   // Tyhjennet��n puskuri
+   // Tyhjennetään puskuri
    while( fgetc(stdin) != '\n');
 }
 
 
 
 // Kysyy pin-koodin käyttäjältä ja vertaa sitä oikeaan pin-koodiin kolme kertaa.
-// oikeaPin (int) - oikea pin-koodi
 // return: 0 tai 1 (int), riippuen oliko pin oikein.
-int kysyPin(int oikeaPin) {
+int kysyPin(void) {
     
     int pin;
 
     for (int i = 1; ; i++) {
-        printf("Syota PIN: ");
+        printf("Syota PIN:\n");
         pin = lueKokonaisluku();
 
-        if (pin == oikeaPin) {
+        if (pin == OIKEAPIN) {
             return 1;
         }
         else if (i == 3) {
@@ -109,21 +112,27 @@ void kysyToiminto(int *toim) {
         *toim = lueKokonaisluku();
         printf("\n");
     } while (*toim < 0 || 4 < *toim);
-    
 }
 
 // Tämä funktio sisältää rahojen nosto -toiminnon myöhemmin.
 // Nyt vain tulostaa jotain.
 void nostaRahaa(void) {
-
-    printf("Nosto valmis. Ota rahat.\n");
+    int nosto;
+    printf("Valitse noston maara:\n");
+    nosto = lueKokonaisluku();
+    if (tarkastaNosto(nosto))
+        saldo -= nosto;
+    else 
+        return;
+    // TODO: Lisää tapahtuma
+    printf("Nosto valmis. Saldo nyt %d.\n", saldo);
+    odotaJatkoa();
 }
 
-// Tämä funktio tarkastaa ja tulostaa saldon myöhemmin.
-// Nyt vain tulostaa jotain.
+// Tämä funktio tarkastaa ja tulostaa saldon.
 void naytaSaldo(void) {
-
-    printf("Tilisi saldo on: 2000e\n");
+    printf("Tilisi saldo on: %d euroa\n", saldo);
+    odotaJatkoa();
 }
 
 // Tämä funktio tulostaa tapahtumat myöhemmin.
@@ -134,11 +143,36 @@ void naytaTapahtumat(void) {
     printf("16.03.2021    -50e\n");
     printf("26.10.2020    +1000e\n");
     printf("05.07.2019    +10e\n");
+    odotaJatkoa();
 }
 
-// Tämä funktio lataa puheaikaa liittymälle myöhemmin.
-// Nyt vain tulostaa jotain.
+// Tämä funktio kysyy puhelinnumeron ja latauksen määrän, joka ladataan liittymälle.
 void lataaPuheaikaa(void) {
-    
-    printf("Puheajan lataus valmis.\n");
+    int puh, lataus;
+    printf("Syota puhelinnumero:\n");
+    puh = lueKokonaisluku();
+    printf("Syota latauksen maara:\n");
+    lataus = lueKokonaisluku();
+    saldo -= lataus;
+    printf("Ladattu puheaikaa %d eurolla numerolle %d.\n", lataus, puh);
+    odotaJatkoa();
+}
+
+// Tarkastaa, onko tilillä tarpeeksi rahaa nostoon.
+// nosto (int) - noston määrä euroina.
+// return: 0 tai 1 (int), riippuen oliko tarpeeksi rahaa.
+int tarkastaNosto(int nosto) {
+    if (nosto > saldo) {
+        printf("Tililla ole tarpeeksi rahaa. Toiminto keskeytetään\n ");
+        odotaJatkoa();
+        return 0;
+    }
+    return 1;
+ 
+}
+
+// Odottaa, että käyttäjä painaa enter jatkaakseen.
+void odotaJatkoa(void) {
+    printf("Paina enteria jatkaaksesi\n");
+    getchar();
 }
