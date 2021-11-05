@@ -2,6 +2,7 @@
 // Tekijä: Niko Heikkilä
 
 #include <stdio.h>
+#include <time.h>
 
 // Funktiot apuohjelmat.c-tiedostosta.
 int lueKokonaisluku(void);
@@ -16,9 +17,20 @@ void naytaTapahtumat(void);
 void lataaPuheaikaa(void);
 int tarkastaNosto(int nosto);
 void odotaJatkoa(void);
+void lisaaTapahtuma(int summa);
 
+// Globaalit muuttujat
 int const OIKEAPIN = 1234;
 int saldo = 5000;
+
+struct Tapahtuma {          // tietorakenne tilitapahtumalle
+    char pvm[11];
+    int summa;
+} tapahtumat[5];            // tallennetaan viisi viimeistä tilitapahtumaa
+// Tapahtumien pitäminen oikeassa järjestyksessä perustuu jonoon.
+// Tässä muuttujat jonon käsittelyä varten.
+int t_head = 0, t_tail = 0, t_size = 0;
+
 
 
 int main(void) {
@@ -114,46 +126,69 @@ void kysyToiminto(int *toim) {
     } while (*toim < 0 || 4 < *toim);
 }
 
-// Tämä funktio sisältää rahojen nosto -toiminnon myöhemmin.
-// Nyt vain tulostaa jotain.
+// Tämä funktio sisältää rahojen nosto -toiminnon.
+// Se kysyy noston määrän, tarkastaa onko nosto mahdollinen
+// ja lisää noston tapahtumiin.
 void nostaRahaa(void) {
+
     int nosto;
     printf("Valitse noston maara:\n");
     nosto = lueKokonaisluku();
+
     if (tarkastaNosto(nosto))
         saldo -= nosto;
     else 
         return;
-    // TODO: Lisää tapahtuma
-    printf("Nosto valmis. Saldo nyt %d.\n", saldo);
+
+    lisaaTapahtuma(-nosto);
+    
+    printf("Nosto valmis. Saldo nyt %d euroa.\n", saldo);
     odotaJatkoa();
 }
 
 // Tämä funktio tarkastaa ja tulostaa saldon.
 void naytaSaldo(void) {
+
     printf("Tilisi saldo on: %d euroa\n", saldo);
     odotaJatkoa();
 }
 
-// Tämä funktio tulostaa tapahtumat myöhemmin.
-// Nyt vain tulostaa jotain.
+// Tämä funktio tulostaa tapahtumat.
+// Tulostaa tapahtumat läpi vanhimmasta uusimpaan.
+// Käyttää globaaleja muuttujia t_tail, t_head ja t_size.
 void naytaTapahtumat(void) {
-
-    printf("10.06.2021    -200e\n");
-    printf("16.03.2021    -50e\n");
-    printf("26.10.2020    +1000e\n");
-    printf("05.07.2019    +10e\n");
+    
+    if (t_size == 0) {
+        printf("Ei tapahtumia tililla\n");
+    }
+    else {
+        int i = t_head;
+        do {
+            printf("%10s%8d e\n", tapahtumat[i].pvm, tapahtumat[i].summa);
+            i = (i + 1) % 5;
+        } while (i != t_tail);
+    }
     odotaJatkoa();
 }
 
-// Tämä funktio kysyy puhelinnumeron ja latauksen määrän, joka ladataan liittymälle.
+// Tämä funktio kysyy puhelinnumeron ja latauksen määrän, 
+// joka ladataan liittymälle. Tarkastaa ja lisää latauksen
+// tapahtumiin.
 void lataaPuheaikaa(void) {
+
     int puh, lataus;
     printf("Syota puhelinnumero:\n");
     puh = lueKokonaisluku();
     printf("Syota latauksen maara:\n");
     lataus = lueKokonaisluku();
-    saldo -= lataus;
+    
+    if (tarkastaNosto(lataus))
+        saldo -= lataus;
+    else 
+        return;
+    
+    lisaaTapahtuma(-lataus);
+
     printf("Ladattu puheaikaa %d eurolla numerolle %d.\n", lataus, puh);
     odotaJatkoa();
 }
@@ -162,8 +197,9 @@ void lataaPuheaikaa(void) {
 // nosto (int) - noston määrä euroina.
 // return: 0 tai 1 (int), riippuen oliko tarpeeksi rahaa.
 int tarkastaNosto(int nosto) {
+
     if (nosto > saldo) {
-        printf("Tililla ole tarpeeksi rahaa. Toiminto keskeytetään\n ");
+        printf("Tililla ole tarpeeksi rahaa. Toiminto keskeytetaan\n");
         odotaJatkoa();
         return 0;
     }
@@ -173,6 +209,27 @@ int tarkastaNosto(int nosto) {
 
 // Odottaa, että käyttäjä painaa enter jatkaakseen.
 void odotaJatkoa(void) {
+
     printf("Paina enteria jatkaaksesi\n");
     getchar();
+}
+
+// Lisää lisää uuden tapahtuman ja poistaa tarvittaessa vanhimman tapahtuman.
+// Hakee nykyisen ajan ja muuntaa sen muotoon DD.MM.YYYY.
+// Vain viisi tapahtumaa säilytetään. Käyttää globaaleja muuttujia 
+// t_tail, t_head ja t_size.
+// summa (int) - Saldon muutoksen määrä.
+void lisaaTapahtuma(int summa) {
+
+    time_t aika = time(NULL);
+    struct tm *p_aika = localtime(&aika);
+
+    strftime(tapahtumat[t_tail].pvm, 11, "%d.%m.%Y", p_aika);
+    tapahtumat[t_tail].summa = summa;
+    
+    t_tail = (t_tail + 1) % 5;
+    if (t_size == 5)
+        t_head = (t_head + 1) % 5;
+    else
+        t_size++;
 }
