@@ -29,7 +29,7 @@ struct Tapahtuma {          // tietorakenne tilitapahtumalle
 } tapahtumat[5];            // tallennetaan viisi viimeistä tilitapahtumaa
 // Tapahtumien pitäminen oikeassa järjestyksessä perustuu jonoon.
 // Tässä muuttujat jonon käsittelyä varten.
-int t_head = 0, t_tail = 0, t_size = 0;
+int tHead = 0, tTail = 0, tSize = 0;
 
 
 
@@ -155,18 +155,18 @@ void naytaSaldo(void) {
 
 // Tämä funktio tulostaa tapahtumat.
 // Tulostaa tapahtumat läpi vanhimmasta uusimpaan.
-// Käyttää globaaleja muuttujia t_tail, t_head ja t_size.
+// Käyttää globaaleja muuttujia tTail, tHead ja tSize.
 void naytaTapahtumat(void) {
     
-    if (t_size == 0) {
+    if (tSize == 0) {
         printf("Ei tapahtumia tililla\n");
     }
     else {
-        int i = t_head;
+        int i = tHead;
         do {
             printf("%10s%8d e\n", tapahtumat[i].pvm, tapahtumat[i].summa);
             i = (i + 1) % 5;
-        } while (i != t_tail);
+        } while (i != tTail);
     }
     odotaJatkoa();
 }
@@ -217,19 +217,19 @@ void odotaJatkoa(void) {
 // Lisää lisää uuden tapahtuman ja poistaa tarvittaessa vanhimman tapahtuman.
 // Hakee nykyisen ajan ja muuntaa sen muotoon DD.MM.YYYY.
 // Vain viisi tapahtumaa säilytetään. Käyttää globaaleja muuttujia 
-// t_tail, t_head ja t_size.
+// tTail, tHead ja tSize.
 // summa (int) - Saldon muutoksen määrä.
 void lisaaTapahtuma(int summa) {
 
     time_t aika = time(NULL);
-    struct tm *p_aika = localtime(&aika);
+    struct tm *pAika = localtime(&aika);
 
-    strftime(tapahtumat[t_tail].pvm, 11, "%d.%m.%Y", p_aika);
-    tapahtumat[t_tail].summa = summa;
+    strftime(tapahtumat[tTail].pvm, 11, "%d.%m.%Y", pAika);
+    tapahtumat[tTail].summa = summa;
     
-    t_tail = (t_tail + 1) % 5;
-    if (t_size == 5)
-        t_head = (t_head + 1) % 5;
+    tTail = (tTail + 1) % 5;
+    if (tSize == 5)
+        tHead = (tHead + 1) % 5;
     else
-        t_size++;
+        tSize++;
 }
