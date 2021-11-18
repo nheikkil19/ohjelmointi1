@@ -4,6 +4,24 @@
 #include <stdio.h>
 #include <time.h>
 
+
+// Globaalit muuttujat
+int const OIKEAPIN = 1234;
+int saldo = 5000;
+
+struct Tapahtuma {          // tietorakenne tilitapahtumalle
+    char pvm[11];
+    int summa;
+} tapahtumat[5];            // tallennetaan viisi viimeistä tilitapahtumaa
+// Tapahtumien pitäminen oikeassa järjestyksessä perustuu jonoon.
+// Tässä muuttujat jonon käsittelyä varten.
+int tHead = 0, tTail = 0, tSize = 0;
+
+typedef struct Setelit {    // tietorakenne noston seteleille
+    int s20;                // 50 setelien määrä
+    int s50;                // 20 setelien määrä
+} setelit;
+
 // Funktiot apuohjelmat.c-tiedostosta.
 int lueKokonaisluku(void);
 void lueRoskat(void);
@@ -18,19 +36,7 @@ void lataaPuheaikaa(void);
 int tarkastaNosto(int nosto);
 void odotaJatkoa(void);
 void lisaaTapahtuma(int summa);
-
-// Globaalit muuttujat
-int const OIKEAPIN = 1234;
-int saldo = 5000;
-
-struct Tapahtuma {          // tietorakenne tilitapahtumalle
-    char pvm[11];
-    int summa;
-} tapahtumat[5];            // tallennetaan viisi viimeistä tilitapahtumaa
-// Tapahtumien pitäminen oikeassa järjestyksessä perustuu jonoon.
-// Tässä muuttujat jonon käsittelyä varten.
-int tHead = 0, tTail = 0, tSize = 0;
-
+setelit laskeSetelit(int nosto);
 
 
 int main(void) {
@@ -132,17 +138,31 @@ void kysyToiminto(int *toim) {
 void nostaRahaa(void) {
 
     int nosto;
-    printf("Valitse noston maara:\n");
-    nosto = lueKokonaisluku();
+    setelit set;
+    while (1) {
+        printf("Valitse noston maara:\n");
+        nosto = lueKokonaisluku();
 
+        if (nosto < 40 || 1000 < nosto)
+            printf("Noston on oltava vahintaan 40 e ja enintaan 1000 e.\n\n");
+
+        else if (nosto % 10) 
+            printf("Noston on oltava jaollinen kymmenella.\n\n");
+
+        else
+            break;
+    }
+    
     if (tarkastaNosto(nosto))
         saldo -= nosto;
     else 
         return;
 
     lisaaTapahtuma(-nosto);
-    
-    printf("Nosto valmis. Saldo nyt %d euroa.\n", saldo);
+    set = laskeSetelit(nosto);
+
+    printf("Setelit ovat\n50 e: %d kpl\n20 e: %d kpl\n", set.s50, set.s20);
+    printf("Nosto valmis. Saldo nyt %d euroa.\n\n", saldo);
     odotaJatkoa();
 }
 
@@ -231,4 +251,23 @@ void lisaaTapahtuma(int summa) {
         tHead = (tHead + 1) % 5;
     else
         tSize++;
+}
+
+// Laskee montako 50 ja 20 seteliä tarvitaan nostoon.
+// Laskee ensin 50 setelien määrän jakolaskulla ja sitten 20.
+// Jos ei mene tasan eli jää 10, niin vähentää yhden 50 setelin
+// ja lisää kolme 20 seteliä.
+// nosto (int) - Noston määrä.
+// return: set (setelit) - Tietorakenne, joka sisältää setelien määrät.
+setelit laskeSetelit(int nosto) {
+    
+    setelit set;
+    set.s50 = nosto / 50;
+    set.s20 = (nosto - set.s50 * 50) / 20;
+
+    if (set.s20 * 20 + set.s50 * 50 != nosto) {
+        set.s50--;
+        set.s20 += 3;
+    }
+    return set;
 }
