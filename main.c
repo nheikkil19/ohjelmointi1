@@ -68,6 +68,7 @@ int main(void) {
 }
 
 
+
 // Lukee kokonaisluvun. Kopioitu kurssilla jaetusta apuohjelmia.c -tiedostosta.
 // return: luku (int) - luettu kokonaisluku
 int lueKokonaisluku(void){
@@ -89,8 +90,6 @@ void lueRoskat(void){
    // Tyhjennetään puskuri
    while( fgetc(stdin) != '\n');
 }
-
-
 
 // Kysyy pin-koodin käyttäjältä ja vertaa sitä oikeaan pin-koodiin kolme kertaa.
 // return: 0 tai 1 (int), riippuen oliko pin oikein.
@@ -114,6 +113,7 @@ int kysyPin(void) {
         }
     }
 }
+
 // Tulostaa saatavilla olevat toiminnot ja kysyy mikä toiminnon käyttäjä haluaa.
 // toim (int *) - osoitin muistipaikkaan, johon valittu toiminto tallennetaan kokonaislukuna.
 void kysyToiminto(int *toim) {
@@ -204,7 +204,6 @@ int tarkastaNosto(int nosto) {
         return 0;
     }
     return 1;
- 
 }
 
 // Odottaa, että käyttäjä painaa enter jatkaakseen.
