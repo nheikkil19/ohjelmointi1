@@ -3,10 +3,10 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 
 
 // Globaalit muuttujat
-int const OIKEAPIN = 1234;
 int saldo = 5000;
 
 struct Tapahtuma {          // tietorakenne tilitapahtumalle
@@ -27,7 +27,7 @@ int lueKokonaisluku(void);
 void lueRoskat(void);
 
 // Omat funktiot
-int kysyPin(void);
+int kysyPin(int oikeapin);
 void kysyToiminto(int *toim);
 void nostaRahaa(void);
 void naytaSaldo(void);
@@ -37,12 +37,15 @@ int tarkastaNosto(int nosto);
 void odotaJatkoa(void);
 void lisaaTapahtuma(int summa);
 setelit laskeSetelit(int nosto);
+int kysyTili(void);
 
 
 int main(void) {
-    int toiminto, suorita;
+    int toiminto, suorita, oikeapin;
 
-    suorita = kysyPin();
+    // anna tili
+    oikeapin = kysyTili();
+    suorita = kysyPin(oikeapin);
 
     while (suorita) {
         kysyToiminto(&toiminto);
@@ -85,7 +88,7 @@ int lueKokonaisluku(void){
 
    while (((status = scanf("%d%c", &luku, &mki)) == 0)  || (2 == status && mki != '\n')){
       lueRoskat();
-      printf("Et syottanyt kokonaislukua > ");
+      printf("Et syottanyt kokonaislukua. Yrita uudestaan:\n");
    }
    return luku;
 }
@@ -97,9 +100,25 @@ void lueRoskat(void){
    while( fgetc(stdin) != '\n');
 }
 
+// Lukee merkkijonon. Kopioitu kurssilla jaetusta apuohjelmia.c -tiedostosta.
+// TODO this
+void lueMerkkijono(char merkkijono[], int pituus) {
+
+   fgets( merkkijono, pituus, stdin );
+
+   // Jos merkkijonon lopussa, ennen lopetusmerkkiä on ylimääräinen
+   // rivinvaihto korvataan se lopetusmerkillä
+   if( merkkijono[ strlen(merkkijono)-1 ] == '\n')
+      merkkijono[ strlen(merkkijono)-1 ] = '\0';
+   else
+      lueRoskat();
+}
+
+
+
 // Kysyy pin-koodin käyttäjältä ja vertaa sitä oikeaan pin-koodiin kolme kertaa.
 // return: 0 tai 1 (int), riippuen oliko pin oikein.
-int kysyPin(void) {
+int kysyPin(int oikeapin) {
     
     int pin;
 
@@ -107,7 +126,7 @@ int kysyPin(void) {
         printf("Syota PIN:\n");
         pin = lueKokonaisluku();
 
-        if (pin == OIKEAPIN) {
+        if (pin == oikeapin) {
             return 1;
         }
         else if (i == 3) {
@@ -126,7 +145,7 @@ void kysyToiminto(int *toim) {
 
     do {
         printf("\nToiminnot:\nSulje (0)\nNosto (1)\nSaldo (2)\nTapahtumat (3)\nLataa puheaikaa (4)\n");
-        printf("Valitse toiminto: ");
+        printf("Valitse toiminto:\n");
         *toim = lueKokonaisluku();
         printf("\n");
     } while (*toim < 0 || 4 < *toim);
@@ -271,3 +290,27 @@ setelit laskeSetelit(int nosto) {
     }
     return set;
 }
+
+//
+//
+int kysyTili(void) {
+    char tilinumero[100];
+    int pin;
+    FILE *tili;
+
+    do {
+        printf("Anna tilinumero:\n");
+        lueMerkkijono(tilinumero, 100);
+        strcat(tilinumero, ".acc");
+        
+        tili = fopen(tilinumero, "r");
+        if (tili == NULL)
+            printf("Tilia ei loydy. Yrita uudestaan.\n");
+
+    } while (tili == NULL);
+    
+    fscanf(tili, "%d", &pin);
+    return pin;
+
+}
+
