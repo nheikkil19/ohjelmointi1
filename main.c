@@ -43,7 +43,6 @@ int kysyTili(void);
 int main(void) {
     int toiminto, suorita, oikeapin;
 
-    // anna tili
     oikeapin = kysyTili();
     suorita = kysyPin(oikeapin);
 
@@ -101,7 +100,8 @@ void lueRoskat(void){
 }
 
 // Lukee merkkijonon. Kopioitu kurssilla jaetusta apuohjelmia.c -tiedostosta.
-// TODO this
+// merkkijono[] (char) - luettu merkkijono tallennetaan tänne.
+// pituus (int) - luetun merkkijonon maksimipituus
 void lueMerkkijono(char merkkijono[], int pituus) {
 
    fgets( merkkijono, pituus, stdin );
@@ -291,8 +291,8 @@ setelit laskeSetelit(int nosto) {
     return set;
 }
 
-//
-//
+// Kysyy tilinumeron ja hakee tilitiedoston sillä numerolla.
+// return: pin (int) - Tilinumeroon liitetty pin-koodi.
 int kysyTili(void) {
     char tilinumero[100];
     int pin;
